@@ -19,13 +19,7 @@ class DeepTraderBotv1:
     totalStoredCandles = 0
     lastStoredCandles= 0
     maxcandles = 200
-
-#    def __init__(self, symbol, balance,maxcandles = 200):
-#        self.symbol = symbol
-#        self.balance = balance
-#        self.maxcandles = maxcandles 
-#
-#        self.candleQueue = deque(maxlen=self.maxcandles)
+    
     
     def __init__(self, config,maxcandles = 50):
         self.symbol = config['symbol']
@@ -43,6 +37,15 @@ class DeepTraderBotv1:
             self.client = Client(self.key , self.priv)
         else:	    
             self.client = Client(key , priv)
+
+    def closeConnection(self):
+        try:
+            self.bm.stop_socket(self.conn_key)
+            self.bm.close()
+            reactor.stop()
+        except:
+            print('Problem stopping connections')    
+        
 
     def connectWebSocket(self):
         self.bm       = BinanceSocketManager(self.client)
@@ -63,6 +66,9 @@ class DeepTraderBotv1:
         fileObject = open(fname,'rb')
         self.candleQueue = pickle.load(fileObject)
         fileObject.close()
+        
+    def getTotalStored(self):
+        return self.totalStoredCandles
 
     def process_message_kline(self,msg):
         #print("message type: {}".format(msg['e']))
@@ -93,19 +99,5 @@ class DeepTraderBotv1:
                 self.lastStoredCandles = self.totalStoredCandles
                 
 			
-#                for cand in self.candleQueue:
-#                    print(cand)
 
-#            self.bm.stop_socket(self.conn_key)
-#            self.bm.close()
-#            reactor.stop()
-#            exit()
-
-
-
-		#print("%s opening: %.8f  and closing: %.8f" %(self.symbol,float(opening),float(closing)))
-
-#	def __del__(self):
-#		self.bm.close()
-#		print("Socket connection closed")
 
