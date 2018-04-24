@@ -50,7 +50,7 @@ if __name__ == "__main__":
         elif selection == 'e':
             print('Exiting the program and stopping all processes.')
             mybot.closeConnection()
-            exit()
+            raise Exception('exit')
         elif selection == 'p':
             print('Total candles: ' + str(mybot.getTotalStored()))
         else:
