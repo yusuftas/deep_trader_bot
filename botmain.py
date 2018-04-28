@@ -8,24 +8,31 @@ from twisted.internet import reactor
 from DeepTraderBot import DeepTraderBotv1
 from bot_utils import read_configuration
 
-#import pickle
-#import cPickle as pickle
+
+
+if sys.version_info[0] < 3: 
+    input = raw_input
 
 
 
 if __name__ == "__main__":
 
-	#Read the configuration file
+    #Read the configuration file
     config = read_configuration('settings.config')
 
+    #Depending on the running type start an operation
+    runner     = config['running_type']
+    queue_size = int(config['queue_size'])
+
+
     #set credential of the accounts.    
-    mybot = DeepTraderBotv1(config,maxcandles=5)
+    mybot = DeepTraderBotv1(config,maxcandles=queue_size)
     mybot.setKeyPriv(config)
     
-    #Depending on the running type start an operation
-    runner = config['running_type']
+
     
     if runner == 'save':
+	print('Connecting and starting the connection')
         mybot.connectClientAccount()
         mybot.connectWebSocket()
     elif runner == 'test':
@@ -46,6 +53,7 @@ if __name__ == "__main__":
             print('Select only one character option from available list:')
             print('\n\t h : help')
             print('\n\t e : exit')
+	    print('\n\t t : test')
             print('\n\t p : print total stored candles')
         elif selection == 'e':
             print('Exiting the program and stopping all processes.')
@@ -53,6 +61,8 @@ if __name__ == "__main__":
             raise Exception('exit')
         elif selection == 'p':
             print('Total candles: ' + str(mybot.getTotalStored()))
+	elif selection == 't':
+	    mybot.test()
         else:
             print('Unknown option.')    
         

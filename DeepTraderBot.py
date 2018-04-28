@@ -7,9 +7,15 @@ from twisted.internet import reactor
 
 from CandleBase import CandleBase
 
-import pickle
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 #import cPickle as pickle
+
+
 
 class DeepTraderBotv1:
 
@@ -18,7 +24,7 @@ class DeepTraderBotv1:
 
     totalStoredCandles = 0
     lastStoredCandles= 0
-    maxcandles = 200
+    #maxcandles = float("inf")
     
     
     def __init__(self, config,maxcandles = 50):
@@ -38,6 +44,13 @@ class DeepTraderBotv1:
         else:	    
             self.client = Client(key , priv)
 
+	#check connectivity
+
+	try:
+	    self.client.ping()
+	except:
+	    print('Problem problem')
+
     def closeConnection(self):
         try:
             self.bm.stop_socket(self.conn_key)
@@ -45,13 +58,22 @@ class DeepTraderBotv1:
             reactor.stop()
         except:
             print('Problem stopping connections')    
+
+    def test(self):
+	tt = self.client.get_server_time()
+	print(tt)
         
 
     def connectWebSocket(self):
-        self.bm       = BinanceSocketManager(self.client)
-        self.conn_key = self.bm.start_kline_socket(self.symbol, self.process_message_kline, interval=KLINE_INTERVAL_1MINUTE)
 
-        self.bm.start()
+	try:
+            self.bm       = BinanceSocketManager(self.client)
+            self.conn_key = self.bm.start_kline_socket(self.symbol, self.process_message_kline, interval=KLINE_INTERVAL_1MINUTE)
+
+            self.bm.start()
+	except:
+	    print('Error connecting')
+
 
     def saveCandles(self,fname):
         fileObject = open(fname,'wb')
@@ -60,7 +82,7 @@ class DeepTraderBotv1:
         
         #clear the queue
         self.candleQueue.clear()
-        print('Saved the queue and cleared it.')
+        #print('Saved the queue and cleared it.')
 
     def loadCandles(self,fname):
         fileObject = open(fname,'rb')
