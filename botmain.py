@@ -7,6 +7,7 @@ from twisted.internet import reactor
 
 from DeepTraderBot import DeepTraderBotv1
 from bot_utils import read_configuration
+from bot_utils import importQueue,plotList
 
 
 
@@ -29,18 +30,27 @@ if __name__ == "__main__":
     mybot = DeepTraderBotv1(config,maxcandles=queue_size)
     mybot.setKeyPriv(config)
     
-
     
     if runner == 'save':
 	print('Connecting and starting the connection')
         mybot.connectClientAccount()
         mybot.connectWebSocket()
+    elif runner == 'plot':
+        start = int(config['start'])
+        step  = int(config['step'])
+        final = int(config['final'])
+        
+        [opening,closing] = importQueue('BTCUSDT',start,step,final)
+        
+        plotList(opening)
+        
+        sys.exit('Plot mode finished, exiting the robot')
+        
     elif runner == 'test':
         print('Testing some part of the code')
     #more options will be added
     else:                           
         sys.exit('Error: Unknown running type is given')
-    
     
     #Program execution options    	
 	
@@ -58,7 +68,7 @@ if __name__ == "__main__":
         elif selection == 'e':
             print('Exiting the program and stopping all processes.')
             mybot.closeConnection()
-            raise Exception('exit')
+            sys.exit('Finished and exiting.')
         elif selection == 'p':
             print('Total candles: ' + str(mybot.getTotalStored()))
 	elif selection == 't':
